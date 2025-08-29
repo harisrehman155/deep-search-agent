@@ -1,4 +1,5 @@
-from agents import Agent, ModelSettings
+from agents import Agent, ModelSettings, handoff
+from agents.extensions import handoff_filters
 from agents_config import UserInfo, gemini_model
 from lead_research_agent import lead_research_agent
 
@@ -39,7 +40,13 @@ planning_agent: Agent = Agent[UserInfo](
     name="Planning Agent",
     instructions=instructions,
     model=gemini_model,
-    handoffs=[lead_research_agent],
+    # handoffs=[lead_research_agent],
+    handoffs=[
+        handoff(
+            agent=lead_research_agent,
+            input_filter=handoff_filters.remove_all_tools,
+        )
+    ],
     model_settings=ModelSettings(
         temperature=0.2,
         max_tokens=1500,

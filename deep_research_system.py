@@ -1,15 +1,11 @@
 import asyncio
 import datetime
-from agents import (
-    Agent,
-    RunContextWrapper,
-    Runner,
-    SQLiteSession,
-)
+from agents import Agent, RunContextWrapper, Runner, SQLiteSession, handoff
 from openai.types.responses import ResponseTextDeltaEvent
 
 from agents_config import UserInfo, gemini_model
 from planning_agent import planning_agent
+from agents.extensions import handoff_filters
 
 
 def dynamic_instructions(
@@ -41,7 +37,12 @@ requirement_gathering_agent = Agent[UserInfo](
     name="Requirement Gathering Agent",
     instructions=dynamic_instructions,
     model=gemini_model,
-    handoffs=[planning_agent],
+    handoffs=[
+        handoff(
+            agent=planning_agent,
+            input_filter=handoff_filters.remove_all_tools,
+        )
+    ],
 )
 
 # Create session memory
